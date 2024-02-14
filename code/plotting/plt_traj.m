@@ -1,3 +1,4 @@
+function [score, varargout] = plt_traj(dat, dim, dat_in_PC, nPC, coeff, mu)
 %% plt_traj - Plot the trajectories in PC space
 %
 % Ruiqi Chen, 2023/01/30
@@ -20,7 +21,6 @@
 % - |coeff|: if provided, |score| is computed by multiplying |dat| (after centering) with
 %   |coeff| instead of calling |pca()|.
 % - |mu|: if provided, |mu| is subtracted from |dat| instead of the mean of |dat|
-function [score, varargout] = plt_traj(dat, dim, dat_in_PC, nPC, coeff, mu)
 
     if nargin < 6; mu = mean(dat, [2 3])'; end
     if nargin < 5; coeff = []; end

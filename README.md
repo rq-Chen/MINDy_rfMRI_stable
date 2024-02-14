@@ -52,7 +52,7 @@ For simplicity, we include some functions from other packages in this repo. Plea
 
 - S11-12: `code\Report_Motifs.m`. 
 
-## Directory Structure
+## Directory and file structure
 
 ### Paths
 
@@ -72,13 +72,20 @@ We saved the deconvoluted rfMRI data to the `data` folder. Using default paramet
 
 The MINDy models were also saved to the `data` folder. Using default parameters, the file will be called `HCP_Rest_FIX_Simple_Mdl200_sess.mat`. The file contains similar variables as the deconvoluted rfMRI data, but with the models instead of the data. The models are saved as a `(nSubj, nModels)` cell array `allMdl`. Each cell is a structure. In particular, the `Param` field contains the parameters of the model. It is a `(1, 6)` cell:
 
-- $W_s$, the sparse component of the connectivity matrix, `(nParcel, nParcel)`
-- $\alpha$, curvature of the transfer function of the neural mass model, `(nParcel, 1)`
+- $W_s$, the sparse component of the connectivity matrix, `(nParcels, nParcels)`
+- $\alpha$, curvature of the transfer function of the neural mass model, `(nParcels, 1)`
 - a 1 \* 2 matrix:
   - $b$, slope of the transfer function, currently fixed as $20/3$
   - a shift term for the transfer function, currently fixed as $0$
 - $c$, a constant drive term, curretly fixed as $0$
-- $W$, connectivity matrix, sum of $W_s$ (sparse component) and $W_l$ (low-rank component), `(nParcel, nParcel)`
-- $D$, decay coefficient, `(nParcel, 1)`
+- $W$, connectivity matrix, sum of $W_s$ (sparse component) and $W_l$ (low-rank component), `(nParcels, nParcels)`
+- $D$, decay coefficient, `(nParcels, 1)`
 
 For most uses, `W = Param{5}; D = Param{6}; A = Param{2}`.
+
+### Attractors
+
+The attractors were also saved to the `data` folder. Using default parameters, the file is called `motifs_PC_HCP_Rest_FIX_Simple_Mdl200_sess.mat`. It contains:
+
+- `allEq`: `(nSubj, nModels)` cell array of `(nParcles, ?)` matrices where each column is a stable equilibrium (`?` could be zero).
+- `allLCMotifs`: `(nSubj, nModels)` cell array of `(1, ?)` cell array (one cell for each limit cycle, `?` could be zero). Each cell contains one `(nParcels, 4)` matrix, representing the "positive/negative extremes" of the "major/minor axes" of the limit cycle. The exact definition depends on `code\utilities\LC2Motif.m`. By default, the first column will be the slowest point on the limit cycle, and the rest will be the points closest to 90/180/270 degree to the first point after projecting the limit cycle into first two PCs. Only the first point (i.e., slowest point) is used in our analysis.
