@@ -1,6 +1,8 @@
 # MINDy Analysis
 
-The analysis pipeline for (Chen et al., 2024).
+This repo contains the analysis scripts for:
+
+Chen, R., Singh, M., Braver, T. S., & Ching, S. (2024). Dynamical models reveal anatomically reliable attractor landscapes embedded in resting state brain networks. bioRxiv. https://doi.org/10.1101/2024.01.15.575745
 
 For simplicity, we include some functions from other packages in this repo. Please note that they might be covered by different licenses. In particular, we include `MINDy_Base_v1.0` from [singhmf/MINDy](https://github.com/singhmf/MINDy) (and modified it a little bit) and `ft_cifti` (`cifti-matlab-master`) from [Washington-University/cifti-matlab](https://github.com/Washington-University/cifti-matlab).
 
