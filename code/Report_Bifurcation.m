@@ -52,7 +52,6 @@ basefont = 14;
 
 mF = matfile(mdlFile);
 load(mdlFile, 'sublist');
-nSubs = length(sublist);
 sublist = extractBetween(sublist, "sub", "Y");
 
 
@@ -97,6 +96,15 @@ end
 %% Taxonomy of attractors for linearly combined models
 
 load(mdlFile, 'allMdl');
+
+% Remove all subjects with at least one model censored
+try
+    load(mtfFile, 'censored');
+    allMdl = allMdl(~any(censored, 2), :);
+catch
+    warning('Did not find censored data index. Assuming no censored data.')
+end
+nSubs = size(allMdl, 1);
 nMdls = numel(allMdl);
 
 % Linearly combined models
@@ -122,6 +130,11 @@ nEqLCb = categorical(nEqLC(:, 2));
 
 % Original models
 load(mtfFile, 'allEq', 'allLCMotif');
+if exist("censored", "var")
+    allEq = allEq(~any(censored, 2), :);
+    allLCMotif = allLCMotif(~any(censored, 2), :);
+end
+
 nEqOrig = cellfun(@(x) size(x, 2), allEq);
 nLCOrig = cellfun(@(x) size(x, 2), allLCMotif);
 nEqLCOrig = string(nEqOrig(:)) + "FP, " + string(nLCOrig(:)) + "LC";

@@ -34,7 +34,7 @@ C=zeros(nX,1);
 nT=size(X0,2);
 BatchInd=randi(nT,NBatch,BatchSz);
 
-if nargin<5
+if nargin<5||isempty(Wmask)
     Wmask=[];
 elseif (mean(size(Wmask)==nX)~=1)||~isempty(find(~ismember(Wmask(:),[0 1]),1))
     error('Wmask should be n x n binary or empty/unspecified[default: all connections]')

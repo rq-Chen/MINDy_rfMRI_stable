@@ -32,7 +32,7 @@ function allInits = GetInits(allDat, nSims, runIdx, sim_per, reuse_init)
                     if reuse_init && i * j > 1
                         allInits{i, j} = allInits{1, 1};
                     else
-                        allInits{i, j} = currDat(:, randi(currL, nSims, 1));
+                        allInits{i, j} = currDat(:, randperm(currL, min(currL, nSims)));
                     end
                 end
             end
@@ -44,7 +44,7 @@ function allInits = GetInits(allDat, nSims, runIdx, sim_per, reuse_init)
                     if reuse_init && j > 1
                         allInits{i, j} = allInits{i, 1};
                     else
-                        allInits{i, j} = currDat(:, randi(currL, nSims, 1));
+                        allInits{i, j} = currDat(:, randperm(currL, min(currL, nSims)));
                     end
                 end
             end
@@ -53,7 +53,7 @@ function allInits = GetInits(allDat, nSims, runIdx, sim_per, reuse_init)
                 for j = 1:nSess
                     currDat = cat(2, allDat{i, runIdx{i, j}});
                     currL = size(currDat, 2);
-                    allInits{i, j} = currDat(:, randi(currL, nSims, 1));
+                    allInits{i, j} = currDat(:, randperm(currL, min(currL, nSims)));
                 end
             end
     end

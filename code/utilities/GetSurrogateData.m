@@ -6,6 +6,7 @@ function [shuffled, matchSp, matchCov, matchMSpCov] = GetSurrogateData(dat, n)
 %       - |n|: number of surrogate datasets to generate
 %
 %   Output:
+%       - |shuffled|: temporally shuffled data of size (nParcels, nTimepoint, n)
 %       - |matchSp|: simulated surrogate data of size (nParcels, nTimepoint,
 %       n) that matches the spectrum of each parcel but with identity covariance
 %       - |matchCov|: simulated surrogate data that matches the covariance

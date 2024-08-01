@@ -17,9 +17,8 @@ function [allMdl, allDat] = GetMINDy(PreDat, runIdx, Wmask, clearRecW, MINDyType
 %       - |runIdx|: (1, N) cell array of index vectors. Example: {[1 2], [3 4]}
 %           for two models per subject, each trained on one session.
 %       - |Wmask|: sparsity mask to the connectivity matrix. Default is no mask.
-%           Only used when |MINDyType| is 'Masked'.
 %       - |clearRecW|: whether to clear the parameter update history to save space.
-%       - |MINDyType|: 'Simple', 'Masked' or 'HRF' (default: 'Simple').
+%       - |MINDyType|: 'Simple', 'NoSmooth' or 'HRF' (default: 'Simple').
 %
 %   Outputs:
 %       - |allMdl|: (nSubs, N) cell array of MINDy model structures
@@ -33,7 +32,7 @@ function [allMdl, allDat] = GetMINDy(PreDat, runIdx, Wmask, clearRecW, MINDyType
         clearRecW = true;
     end
     if nargin < 3 || isempty(Wmask)
-        Wmask = 1;
+        Wmask = [];
     end
     if nargin < 2 || isempty(runIdx)
         runIdx = cell(size(PreDat, 1), 1);
@@ -56,12 +55,14 @@ function [allMdl, allDat] = GetMINDy(PreDat, runIdx, Wmask, clearRecW, MINDyType
     
     for i = 1:nSub
         for j = 1:nSess
-            if strcmpi(MINDyType, 'Masked')
+            if strcmpi(MINDyType, 'Simple')
                 [allMdl{i, j}, ~, ~, tmpDat] = ...
-                    MINDy_Simple_Rec(PreDat(i, runIdx{i, j}), .72, 'n', Wmask, nBatch);
-            elseif strcmpi(MINDyType, 'Simple')
+                    MINDy_Tinker(PreDat(i, runIdx{i, j}), .72, 'y', 'y', ...
+                    [], [], [], [], [], [], [], Wmask, []);
+            elseif strcmpi(MINDyType, 'NoSmooth')
                 [allMdl{i, j}, ~, ~, tmpDat] = ...
-                    MINDy_Simple(PreDat(i, runIdx{i, j}), .72, 'y');
+                    MINDy_Tinker(PreDat(i, runIdx{i, j}), .72, 'n', 'y', ...
+                    [], [], [], [], [], [], [], Wmask, []);
             elseif strcmpi(MINDyType, 'HRF')
                 [tmpMdl, ~, ~, ~, tmpDat] = ...
                     MINDy_HRFbold_Simple_Din(PreDat(i, runIdx{i, j}), .72, 'y');
@@ -75,6 +76,14 @@ function [allMdl, allDat] = GetMINDy(PreDat, runIdx, Wmask, clearRecW, MINDyType
             % Clear up unused field to save memory and parpool overhead
             if clearRecW && isfield(allMdl{1}, 'RecW')
                 allMdl{i, j} = rmfield(allMdl{i, j}, {'RecW', 'RecA', 'RecD'});
+            end
+            % Clear the function handles which will generate warning when loading
+            if isfield(allMdl{i, j}, 'dTran')
+                allMdl{i, j} = rmfield(allMdl{i, j}, 'dTran');
+            end
+            % Remove Wmask (can save separately instead of in each model)
+            if isfield(allMdl{i, j}, 'Wmask')
+                allMdl{i, j} = rmfield(allMdl{i, j}, 'Wmask');
             end
         end
     end

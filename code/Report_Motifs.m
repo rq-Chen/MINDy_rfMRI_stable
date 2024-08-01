@@ -44,7 +44,7 @@ addParameter(p, 'vis', true, @islogical);
 addParameter(p, 'figdir', fullfile('figures', mdlName), @ischar);
 addParameter(p, 'mtfType', 'all', @(x) ismember(x, {'FP', 'LC', 'all'}));
 addParameter(p, 'exclude_origin', true, @islogical);
-addParameter(p, 'exclude_n_LC', 2, @isnumeric);  % Exclude models with more than this number of LCs
+addParameter(p, 'exclude_n_LC', 0, @isnumeric);  % Exclude models with more than this number of LCs (0 for no exclusion)
 addParameter(p, 'LCGhostOnly', true, @islogical);  % Only include the slowest point on LC
 addParameter(p, 'normalize', true, @islogical);
 addParameter(p, 'demean', false, @islogical);
@@ -94,6 +94,15 @@ catch
     clear allLC
 end
 
+% Exclude censored data
+try
+    load(mtfFile, 'censored');
+    allEq = allEq(~any(censored, 2), :);
+    allLCMotif = allLCMotif(~any(censored, 2), :);
+catch
+    warning('Did not find censored data index. Assuming no censored data.')
+end
+
 if vis && size(allEq, 2) > 1
 
     % Count number of motifs
@@ -110,8 +119,10 @@ if vis && size(allEq, 2) > 1
     [N, idx] = sort(N, 'descend');
     C = C(idx);
     idx = find(N < pthres * numel(nFpLC), 1);
-    nFpLC = mergecats(nFpLC, C(idx:end), 'others');
-    C = [C(1:idx - 1) {'others'}];
+    if ~isempty(idx)
+        nFpLC = mergecats(nFpLC, C(idx:end), 'others');
+        C = [C(1:idx - 1) {'others'}];
+    end
     nFpLC = reordercats(nFpLC, C);
 
     [C, ~, ic] = unique(nFpLC);

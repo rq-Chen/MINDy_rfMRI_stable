@@ -1,0 +1,8 @@
+data/*
+figures/*
+
+# Keep the atlas files
+!data/atlas/
+
+# Keep the list of censored models
+!data/censored_models.csv

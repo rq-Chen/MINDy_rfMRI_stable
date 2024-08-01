@@ -13,11 +13,22 @@ function [sublist, allEq, allLCMotif] = Report_Attractor_Landscape(mdlName, vara
 %     figdir: directory to save the figures (default: 'figures/<mdlName>')
 %     vis: whether to visualize the vector field and motifs (default: true)
 %     nSubs: number of subjects to process (default: 0, all subjects)
+%     init_w_dat: if true, the initial conditions were sampled from deconvolved fMRI, otherwise
+%         they were sampled from a normal distribution (default: false)
+%     datFile: name of the file containing the data (default: replace(mdlFile, 'Mdl', 'Deconv')),
+%         only used when init_w_dat is true
+%     nInits: number of initial conditions to sample (default: 120)
+%     minT: minimum number of time steps to simulate (default: 1600). The function will keep
+%         simulating until at least one attractor is found, up to 10 * minT steps.
 %
 % Ruiqi Chen, 09/02/2023
 %
 % This script visualizes the vector field and attractor motifs of the model.
 % Figures are saved to |figdir| and the extracted motifs are saved to |outFile|.
+%
+% In the paper we run this script with `init_w_dat = true` and `nInits = 1000`, but the
+% default values should give identical results (except for a few problematic cases which
+% would be censored anyway) and run much faster.
 %
 % |outFile| (and the function output) contains the following variables:
 %   - |sublist|: subject IDs. (nSubs, 1) string.
@@ -45,6 +56,10 @@ addParameter(p, 'outFile', fullfile('data', ['motifs_' mdlName '.mat']), @ischar
 addParameter(p, 'figdir', fullfile('figures', mdlName), @ischar);
 addParameter(p, 'vis', true, @islogical);
 addParameter(p, 'nSubs', 0, @isnumeric);
+addParameter(p, 'init_w_dat', false, @islogical);
+addParameter(p, 'datFile', fullfile('data', [replace(mdlName, 'Mdl', 'Deconv') '.mat']), @ischar);
+addParameter(p, 'nInits', 120, @isnumeric);
+addParameter(p, 'minT', 1600, @isnumeric);
 parse(p, varargin{:});
 
 mdlFile = p.Results.mdlFile;
@@ -52,6 +67,10 @@ outFile = p.Results.outFile;
 figdir = p.Results.figdir;
 vis = p.Results.vis;
 nSubs = p.Results.nSubs;
+init_w_dat = p.Results.init_w_dat;
+datFile = p.Results.datFile;
+nInits = p.Results.nInits;
+minT = p.Results.minT;
 
 if ~exist(figdir, 'dir')
     mkdir(figdir);
@@ -86,6 +105,18 @@ catch
     sublist = "#" + string((1:nSubs)');
 end
 
+if init_w_dat
+    try
+        load(datFile, 'allDat', 'runIdx');
+    catch
+        error('Data file %s not found', datFile);
+    end
+    allDat = allDat(1:nSubs, :);
+    runIdx = runIdx(1:nSubs, :);
+    allInits = GetInits(allDat, nInits, runIdx, 'model');
+    clear allDat runIdx;
+end
+
 nSess = size(allMdl, 2);
 allEq = cell(nSubs, nSess);
 allLCMotif = cell(nSubs, nSess);
@@ -101,7 +132,12 @@ for iSub = 1:nSubs
         mdl = allMdl{iSub, iSess};
 
         % Get trajectories and attractors
-        [eq, lc, sims] = GetEqLC(mdl);
+        if init_w_dat
+            inits = allInits{iSub, iSess};
+        else
+            inits = randn(size(mdl.Param{5}, 1), nInits);
+        end
+        [eq, lc, sims] = GetEqLC(mdl, inits, minT);
 
         % Get motifs
         lcMotif = LC2Motif(lc);
@@ -164,13 +200,23 @@ end
 nEq = cellfun(@(x) size(x, 2), allEq);
 nLC = cellfun(@(x) size(x, 2), allLCMotif);
 nEqLC = string(nEq(:)) + "FP, " + string(nLC(:)) + "LC";
-nEqLC = categorical(nEqLC);
+
+% Sort the categories based on popularity
+nEqLC = categorical(nEqLC, "Ordinal", true);
+[N, C] = histcounts(nEqLC);
+[N, idx] = sort(N, 'descend');
+C = C(idx);
+P = N / numel(nEqLC);
+nEqLC = reordercats(nEqLC, C);
 
 fig = figure('Units', 'inches', 'Position', [0 0.5 10 5], 'Visible', 'off');
 histogram(nEqLC, 'Normalization', 'probability');
+hold on;
+text(1:length(N), P, compose("%.3f", P), 'HorizontalAlignment', 'center', ...
+    'VerticalAlignment', 'bottom');
 xlabel('Number of stable fixed points (FP) and stable limit cycles (LC)');
 ylabel('Probability');
-title(sprintf('Distribution of attractors in %s (n = %d)', mdlName, nSubs), ...
+title(sprintf('Distribution of attractors in %s (n = %d)', mdlName, numel(nEqLC)), ...
     'Interpreter', 'none');
 PrintAsSeen(fullfile(figdir, sprintf('nFPLC_%s', mdlName)), '-dpng', '-r200');
 close(fig);

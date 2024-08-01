@@ -4,7 +4,8 @@ function [eq, lc, sims, eqIdx, lcIdx] = GetEqLC(mdl, inits, T)
 %   Inputs:
 %     - mdl: MINDy structure or EqFinderVec object
 %     - inits: (nParcels, nSims) initial conditions (default 120 random inits)
-%     - T: minimum simulation time (default 1600)
+%     - T: minimum simulation steps (default 1600). The function will keep
+%         simulating until at least one attractor is found, up to 10T steps.
 %
 %   Outputs:
 %     - eq: (nParcels, nEq) stable fixed points
@@ -16,7 +17,7 @@ function [eq, lc, sims, eqIdx, lcIdx] = GetEqLC(mdl, inits, T)
 %         converging to any lc)
 %
 %   The function will make sure the number of stable fixed points are even
-%   by computing a correlation matrix and finding out the missing one in a pair.
+%   by computing a correlation matrix and adding the missing one in a pair.
 
     % Handle inputs
     if isstruct(mdl)

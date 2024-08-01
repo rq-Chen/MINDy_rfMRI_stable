@@ -4,7 +4,9 @@ This repo contains the analysis scripts for:
 
 Chen, R., Singh, M., Braver, T. S., & Ching, S. (2024). Dynamical models reveal anatomically reliable attractor landscapes embedded in resting state brain networks. bioRxiv. https://doi.org/10.1101/2024.01.15.575745
 
-For simplicity, we include some functions from other packages in this repo. Please note that they might be covered by different licenses. In particular, we include `MINDy_Base_v1.0` from [singhmf/MINDy](https://github.com/singhmf/MINDy) (and modified it a little bit) and `ft_cifti` (`cifti-matlab-master`) from [Washington-University/cifti-matlab](https://github.com/Washington-University/cifti-matlab).
+For simplicity, we include some functions from other packages in this repo. Please note that they might be covered by different licenses. In particular, we include `MINDy_Base_v1.0` from [singhmf/MINDy](https://github.com/singhmf/MINDy) (and modified it a little bit), `ft_cifti` (`cifti-matlab-master`) from [Washington-University/cifti-matlab](https://github.com/Washington-University/cifti-matlab), and part of `dFCwalk` from [FunDyn/dFCwalk](https://github.com/FunDyn/dFCwalk).
+
+The scripts were tested using MATLAB R2022b under Windows and Linux. One Supplementary Figure requires `R` and the package `wrsk` for robust K-means clustering.
 
 ## Pipeline
 
@@ -12,45 +14,67 @@ For simplicity, we include some functions from other packages in this repo. Plea
 
 2. Run `init_prj.m` to set up paths (see below).
 
-3. Run `code\training\GetHCPRestModel.m` to train the MINDy models and save the models as well as the deconvoluted rfMRI data into `data\`.
+3. Run `code/training/GetHCPRestModel.m` to train the MINDy models and save the models as well as the deconvoluted rfMRI data into `data/`.
 
-4. Run `code\Report_Attractor_Landscape.m` to visualize the vector field of every single model and obtain the attractors. Figures (128 in total!) will be saved to `figures\` and attractors will be saved to `data\`.
+4. Run `code/Report_Attractor_Landscape.m` to visualize the vector field of every single model and obtain the attractors. Figures (128 in total!) will be saved to `figures/` and attractors will be saved to `data/`.
 
-5. Run `code\Report_Bifurcation.m` to perform the induced bifurcation analysis.
+5. Visually inspect the figures to make sure the attractors were correctly identified. Record the models where the numerical procedure might have failed in the file `data/censored_models.csv`.
 
-6. Run `code\Report_Attractor_Reliability.m` to perform the attractor reliability analysis.
+6. Run `code/Censor_Models.m` to exclude the problematic models (as well as the models from the same participant) from further analysis and re-generate the figure of the distribution of dynamics across clean models.
 
-7. Run `code\Report_Motifs.m` to perform the attractor clustering analysis.
+7. Run `code/Report_Bifurcation.m` to perform the induced bifurcation analysis.
+
+8. Run `code/Report_Attractor_Reliability.m` to perform the attractor reliability analysis.
+
+9. Run `code/Report_Motifs.m` to perform the attractor clustering analysis.
+
+10. Run other scripts under `code/Supplementary/` to generate the supplementary figures and videos (see below).
 
 ## Figures
 
-- 1B: From `code\Report_Motifs.m`.
+- 1B: From `code/Report_Motifs.m`.
 
-- 1C: From `code\example_dynamics.m` with `plotType = 'popular'`.
+- 1C: From `code/example_dynamics.m` with `plotType = 'popular'`.
 
-- 2: From `code\Report_Bifurcation.m`.
+- 2: From `code/Report_Bifurcation.m`.
 
-- 3: From `code\Report_Attractor_Reliability.m`.
+- 3: From `code/Report_Attractor_Reliability.m`.
 
-- 4: From `code\Report_Motifs.m`.
+- 4: From `code/Report_Motifs.m`.
 
-- S1: `code\Supplementary\Figure_Cross_Validation.m`.
+- S1: `code/Supplementary/Figure_Cross_Validation.m`.
 
-- S2: `code\Supplementary\Report_Simulation_Validation.m`.
+- S2: `code/Supplementary/Report_Simulation_Validation.m`.
 
-- S3: `code\Supplementary\Report_Param_Reliability.m`.
+- S3: `code/Supplementary/Report_Analysis_Deconv.m`
 
-- S4: `code\Supplementary\MINDy200_CCA.m` (Note: CCA was performed by [this repo](https://github.com/rq-Chen/HCP_CCA_1200_OSF)).
+- S4: `code/Supplementary/Report_Param_Reliability.m`.
 
-- S5: `code\example_dynamics.m` with `plotType = 'rare'`.
+- S5: `code/Supplementary/MINDy200_CCA.m` (Note: CCA was performed by [this repo](https://github.com/rq-Chen/HCP_CCA_1200_OSF)).
 
-- S6: `code\plotting\infinite_period_bifurcation.m`.
+- S6: `code/Supplementary/Figure_SC.m`
 
-- S7: `code\Report_Motifs.m`.
+- S7: `code/Censor_Models.m`
 
-- S8-S10: `code\Report_Motifs.m` with corresponding inputs.
+- S8: `code/Supplementary/Figure_more_inits.m`
 
-- S11-12: `code\Report_Motifs.m`. 
+- S9: `code/Censor_Models.m`
+
+- S10: `code/example_dynamics.m` with `plotType = 'rare'`.
+
+- S11: `code/Supplementary/infinite_period_bifurcation.m`.
+
+- S12: `code/Report_Motifs.m`.
+
+- S13-S15: `code/Report_Motifs.m` with corresponding inputs.
+
+- S16: `code/Supplementary/Figure_Robust_Kmeans.m` and `code/Supplementary/Figure_Robust_Kmeans.R`
+
+- S17-18: `code/Report_Motifs.m`.
+
+- S19-21: Similar to S9, S12 and Figure 4, but using models fit with one-step instead of two-step difference. This is done by setting `'MINDyType, 'NoSmooth'` when running `GetHCPRestModel`.
+
+- Videos: `code/Supplementary/Video_trajectories.m`.
 
 ## Directory and file structure
 
@@ -88,4 +112,4 @@ For most uses, `W = Param{5}; D = Param{6}; A = Param{2}`.
 The attractors were also saved to the `data` folder. Using default parameters, the file is called `motifs_PC_HCP_Rest_FIX_Simple_Mdl200_sess.mat`. It contains:
 
 - `allEq`: `(nSubj, nModels)` cell array of `(nParcles, ?)` matrices where each column is a stable equilibrium (`?` could be zero).
-- `allLCMotifs`: `(nSubj, nModels)` cell array of `(1, ?)` cell array (one cell for each limit cycle, `?` could be zero). Each cell contains one `(nParcels, 4)` matrix, representing the "positive/negative extremes" of the "major/minor axes" of the limit cycle. The exact definition depends on `code\utilities\LC2Motif.m`. By default, the first column will be the slowest point on the limit cycle, and the rest will be the points closest to 90/180/270 degree to the first point after projecting the limit cycle into first two PCs. Only the first point (i.e., slowest point) is used in our analysis.
+- `allLCMotifs`: `(nSubj, nModels)` cell array of `(1, ?)` cell array (one cell for each limit cycle, `?` could be zero). Each cell contains one `(nParcels, 4)` matrix, representing the "positive/negative extremes" of the "major/minor axes" of the limit cycle. The exact definition depends on `code/utilities/LC2Motif.m`. By default, the first column will be the slowest point on the limit cycle, and the rest will be the points closest to 90/180/270 degree to the first point after projecting the limit cycle into first two PCs. Only the first point (i.e., slowest point) is used in our analysis.

@@ -1,4 +1,4 @@
-function[Out,Wfin,Dfin]=MINDy_Tinker(Dat,TR,isDnSampDeriv,doPreProc,lam1,lam2,SpDiag,MaxRank,BatchSz,NBatch,ConvNSR,Wmask,doRecord)
+function[Out,Wfin,Dfin,Dat]=MINDy_Tinker(Dat,TR,isDnSampDeriv,doPreProc,lam1,lam2,SpDiag,MaxRank,BatchSz,NBatch,ConvNSR,Wmask,doRecord)
 %% Just Input Data as region x time (a single matrix or cell of matrices)
 %% TR is the sampling TR for fMRI in seconds
 %% IsDnSampDeriv denotes whether to take the one step derivative ('n') or...

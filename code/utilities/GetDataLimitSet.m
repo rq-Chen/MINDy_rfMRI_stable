@@ -91,7 +91,10 @@ end
 % in the last cycle. Therefore, the time the state visits x(T) last time is
 % about the center of the SECOND LAST nonzero entry of "approaching" and
 % the LAST nonzero entry of "leaving".
-dist2end = squeeze(vecnorm(sims - sims(:, end, :)));  % (T, nSims)
+dist2end = squeeze(vecnorm(sims - sims(:, end, :)));
+if isrow(dist2end)  % When nSims = 1
+    dist2end = dist2end';  % (T, nSims)
+end
 recurring = dist2end < RECUR_TOL;
 approaching = (recurring(2:end, :) - recurring(1:end - 1, :) == 1);
 leaving = (recurring(2:end, :) - recurring(1:end - 1, :) == -1);

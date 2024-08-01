@@ -17,8 +17,10 @@ addParameter(p, 'PreprocType', 'FIX', @(x) ismember(x, {'FIX', 'NoFIX'}));
 addParameter(p, 'subListFile', '', @ischar);
 % Subset of subject IDs to exclude (set as empty to exclude none)
 addParameter(p, 'excludeListFile', '', @ischar);
-% MINDy model type ('Simple', 'Masked' (MINDy_Rec), or 'HRF', only 'Simple' is supported for now)
-addParameter(p, 'MINDyType', 'Simple', @(x) ismember(x, {'Simple', 'Masked', 'HRF'}));
+% Path to file containing variable 'Wmask', mask of connectivity matrix
+addParameter(p, 'WmaskFile', '', @ischar);
+% MINDy model type ('Simple' (default), 'NoSmooth' (dx = x(n+1) - x(n)), or 'HRF' (not supported yet))
+addParameter(p, 'MINDyType', 'Simple', @(x) ismember(x, {'Simple', 'NoSmooth', 'HRF'}));
 % Number of parcels (100, 200, or 400)
 addParameter(p, 'nParcels', 200, @(x) ismember(x, [100, 200, 400]));
 % Which runs to use:
@@ -49,6 +51,7 @@ datDir = p.Results.datDir;
 PreprocType = p.Results.PreprocType;
 subListFile = p.Results.subListFile;
 excludeListFile = p.Results.excludeListFile;
+WmaskFile = p.Results.WmaskFile;
 MINDyType = p.Results.MINDyType;
 nParcels = p.Results.nParcels;
 useRun = p.Results.useRun;
@@ -61,8 +64,8 @@ output_Mdl = p.Results.output_Mdl;
 switch MINDyType
     case 'Simple'
         init_prj('MINDy_Base_v1.0');
-    case 'Masked'
-        init_prj('MINDy_RC');
+    case 'NoSmooth'
+        init_prj('MINDy_Base_v1.0');
     case 'HRF'
         init_prj('MINDy_HRF_v1.0');
 end
@@ -77,25 +80,34 @@ elseif strcmpi(useRun, "random")
 elseif strcmpi(useRun, "all")
     minRuns = 2;  % Models can be trained with different number of runs, but number of training batches are the same.
 end
-maskFile = fullfile('data', 'atlas', 'Wmask_RC.mat');  % Will be ignored unless |MINDyType| = 'Masked'
-clearRecW = false;  % Clear parameter update history or not (only useful for 'Masked' model)
+clearRecW = false;  % Clear parameter update history or not
+
+% Mask
+if exist(WmaskFile, 'file')
+    load(WmaskFile, 'Wmask');
+    [~, maskName, ~] = fileparts(WmaskFile);
+    maskName = ['_', maskName];
+else
+    Wmask = [];
+    maskName = '';
+end
 
 % Output
 if output_BOLD
-    preOut = fullfile('data', sprintf('HCP_Rest_%s_%s_BOLD%d_%s.mat', ...
-        PreprocType, MINDyType, nParcels, useRun));  % BOLD data
+    preOut = fullfile('data', sprintf('HCP_Rest_%s_%s%s_BOLD%d_%s.mat', ...
+        PreprocType, MINDyType, maskName, nParcels, useRun));  % BOLD data
 else
     preOut = '';
 end
 if output_Deconv
-    datOut = fullfile('data', sprintf('HCP_Rest_%s_%s_Deconv%d_%s.mat', ...
-        PreprocType, MINDyType, nParcels, useRun));  % Deconvoluted data
+    datOut = fullfile('data', sprintf('HCP_Rest_%s_%s%s_Deconv%d_%s.mat', ...
+        PreprocType, MINDyType, maskName, nParcels, useRun));  % Deconvoluted data
 else
     datOut = '';
 end
 if output_Mdl
-    mdlOut = fullfile('data', sprintf('HCP_Rest_%s_%s_Mdl%d_%s.mat', ...
-        PreprocType, MINDyType, nParcels, useRun));  % Models
+    mdlOut = fullfile('data', sprintf('HCP_Rest_%s_%s%s_Mdl%d_%s.mat', ...
+        PreprocType, MINDyType, maskName, nParcels, useRun));  % Models
 else
     mdlOut = '';
 end
@@ -176,13 +188,6 @@ end
 
 %% Training
 
-% Wmask
-if nParcels == 100 && ~isempty(maskFile)
-    load(maskFile, 'Wmask');
-else
-    Wmask = 1;
-end
-
 % Run index
 if strcmp(useRun, "random")
     runIdx = cell(nSubs, 1);
@@ -207,7 +212,7 @@ if ~isempty(datOut)
     save(datOut, "allDat", "runIdx", "InputFiles", "sublist", '-v7.3');
 end
 if ~isempty(mdlOut)
-    save(mdlOut, "allMdl", "runIdx", "InputFiles", "sublist", '-v7.3');
+    save(mdlOut, "allMdl", "runIdx", "InputFiles", "sublist", "Wmask", '-v7.3');
 end
 
 end

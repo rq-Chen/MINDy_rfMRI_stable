@@ -44,7 +44,7 @@ end
 basefont = 14;
 
 
-%% Motif reliability
+%% Load data
 
 load(mtfFile, 'allEq', 'allLCMotif');
 try  % For compatibility with outdated data files
@@ -52,6 +52,18 @@ try  % For compatibility with outdated data files
 catch
     load(mtfFile, 'allLC');
     allLCMotif = cellfun(@LC2Motif, allLC, 'UniformOutput', false);
+end
+% Load model
+load(mdlFile, 'allMdl');
+
+% Exclude censored data
+try
+    load(mtfFile, 'censored');
+    allEq = allEq(~any(censored, 2), :);
+    allLCMotif = allLCMotif(~any(censored, 2), :);
+    allMdl = allMdl(~any(censored, 2), :);
+catch
+    warning('Did not find censored data index. Assuming no censored data.')
 end
 
 if LCGhostOnly  % Reduce the bias of LC having too many motifs
@@ -73,7 +85,11 @@ else
 end
 allEq = allEq(keepSub, :);
 allLCMotif = allLCMotif(keepSub, :);
+allMdl = allMdl(keepSub, :);
 [nSubs, nSess] = size(allEq);
+
+
+%% Attractor consistency
 
 % Attractor types and consistency across sessions
 nEq = cellfun(@(x) size(x, 2), allEq);
@@ -167,7 +183,7 @@ lgd.AutoUpdate = 'off';
 % end
 
 fontsize(gca, basefont, "points");
-title({'Maximum correlation between attractors', ''});
+title({'Dominant Attractor Similarity (DAS)', ''});
 % title(sprintf('MaxCorr ~ 1 + WithinOrAcross * AttTypeConsistency (n = %d)', nSubs), ...
 %     'FontSize', basefont + 2);
 % subtitle(sprintf('P(WithinOrAcross) = %.2g, P(AttTypeConsistency) = %.2g, P(interaction) = %.2g', ...
@@ -182,11 +198,16 @@ title({'Maximum correlation between attractors', ''});
 
 %% Limit cycle speed distribution
 
-% Load model
-load(mdlFile, 'allMdl');
-allMdl = allMdl(keepSub, :);
-allMdl = allMdl(nLC > 0);
-spRange = cellfun(@GetSpeedRange, allMdl, "UniformOutput", false);
+% Remove the added ghost for 1LC models
+if LCGhostOnly
+    for i = 1:numel(allLCMotif)
+        if nLC(i) == 1
+            allLCMotif{i} = allLCMotif{i}(:, 1);
+        end
+    end
+end
+
+spRange = cellfun(@GetSpeedRange, allMdl(nLC > 0), allLCMotif(nLC > 0), "UniformOutput", false);
 spRange = [spRange{:}];
 
 nexttile(1);
@@ -203,14 +224,14 @@ xticklabels(tmp);
 xlabel('Ratio between max and min speed');
 ylabel('Frequency');
 fontsize(gca(), basefont, 'points');
-title({'Distribution of the speed range on limit cycles', ''}, 'FontSize', basefont + 2, ...
+title({sprintf('Distribution of speed range on limit cycles (n = %d)', numel(spRange)), ''}, 'FontSize', basefont + 2, ...
     'FontWeight', 'bold');
 
 lgd.Layout.Tile = 'east';
 set(findall(gcf,'type','text'), 'FontName','helvetica');
 PrintAsSeen(f, fullfile(figdir, ['Motif_Reliability_' mdlName]), '-dsvg', '-vector');
 PrintAsSeen(f, fullfile(figdir, ['Motif_Reliability_' mdlName]), '-dpdf', '-vector');
-
+save(fullfile('data', ['LCspRange_' mdlName '.mat']), 'spRange');
 
 end
 
@@ -224,8 +245,8 @@ end
 m = mean(M, varargin{:}, "omitnan");
 end
 
-function r = GetSpeedRange(mdl)
-    [~, lc] = GetEqLC(mdl);
+function r = GetSpeedRange(mdl, init)
+    [~, lc] = GetEqLC(mdl, init);
     r = nan(size(lc));
     for i = 1:numel(lc)
         v = squeeze(vecnorm(lc{i}(:, 2:end) - lc{i}(:, 1:end-1)));

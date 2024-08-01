@@ -125,7 +125,7 @@ else  % Add a label for each network at the mean index
     yticklabels(unq);
 end
 fontsize(gca, basefont, "points");
-title('Coefficients', 'FontSize', basefont + 2);
+title('Attractors', 'FontSize', basefont + 2);
 
 % Surface plots
 % cl = [-1 1] * max(abs(centroids), [], 'all');
