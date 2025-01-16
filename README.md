@@ -2,7 +2,7 @@
 
 This repo contains the analysis scripts for:
 
-Chen, R., Singh, M., Braver, T. S., & Ching, S. (2024). Dynamical models reveal anatomically reliable attractor landscapes embedded in resting state brain networks. bioRxiv. https://doi.org/10.1101/2024.01.15.575745
+Chen, R., Singh, M., Braver, T.S., & Ching, S. (2025). Dynamical models reveal anatomically reliable attractor landscapes embedded in resting state brain networks. Imaging Neuroscience, Advance Publication. [https://doi.org/10.1162/imag_a_00442](https://doi.org/10.1162/imag_a_00442)
 
 For simplicity, we include some functions from other packages in this repo. Please note that they might be covered by different licenses. In particular, we include `MINDy_Base_v1.0` from [singhmf/MINDy](https://github.com/singhmf/MINDy) (and modified it a little bit), `ft_cifti` (`cifti-matlab-master`) from [Washington-University/cifti-matlab](https://github.com/Washington-University/cifti-matlab), and part of `dFCwalk` from [FunDyn/dFCwalk](https://github.com/FunDyn/dFCwalk).
 
@@ -46,33 +46,35 @@ The scripts were tested using MATLAB R2022b under Windows and Linux. One Supplem
 
 - S2: `code/Supplementary/Report_Simulation_Validation.m`.
 
-- S3: `code/Supplementary/Report_Analysis_Deconv.m`
+- S3: `code/Supplementary/Figure_Shuffle_Weights.m` and `code/Supplementary/Figure_Shuffle_Weights.Rmd`.
 
-- S4: `code/Supplementary/Report_Param_Reliability.m`.
+- S4: `code/Supplementary/Report_Analysis_Deconv.m`
 
-- S5: `code/Supplementary/MINDy200_CCA.m` (Note: CCA was performed by [this repo](https://github.com/rq-Chen/HCP_CCA_1200_OSF)).
+- S5: `code/Supplementary/Report_Param_Reliability.m`.
 
-- S6: `code/Supplementary/Figure_SC.m`
+- S6: `code/Supplementary/MINDy200_CCA.m` (Note: CCA was performed by [this repo](https://github.com/rq-Chen/HCP_CCA_1200_OSF)).
 
-- S7: `code/Censor_Models.m`
+- S7: `code/Supplementary/Figure_SC.m`
 
-- S8: `code/Supplementary/Figure_more_inits.m`
+- S8: `code/Censor_Models.m`
 
-- S9: `code/Censor_Models.m`
+- S9: `code/Supplementary/Figure_more_inits.m`
 
-- S10: `code/example_dynamics.m` with `plotType = 'rare'`.
+- S10: `code/Censor_Models.m`
 
-- S11: `code/Supplementary/infinite_period_bifurcation.m`.
+- S11: `code/example_dynamics.m` with `plotType = 'rare'`.
 
-- S12: `code/Report_Motifs.m`.
+- S12: `code/Supplementary/infinite_period_bifurcation.m`.
 
-- S13-S15: `code/Report_Motifs.m` with corresponding inputs.
+- S13: `code/Report_Motifs.m`.
 
-- S16: `code/Supplementary/Figure_Robust_Kmeans.m` and `code/Supplementary/Figure_Robust_Kmeans.R`
+- S14-S16: `code/Report_Motifs.m` with corresponding inputs.
 
-- S17-18: `code/Report_Motifs.m`.
+- S17: `code/Supplementary/Figure_Robust_Kmeans.m` and `code/Supplementary/Figure_Robust_Kmeans.R`
 
-- S19-21: Similar to S9, S12 and Figure 4, but using models fit with one-step instead of two-step difference. This is done by setting `'MINDyType, 'NoSmooth'` when running `GetHCPRestModel`.
+- S18-19: `code/Report_Motifs.m`.
+
+- S20-22: Similar to S10, S13 and Figure 4, but using models fit with one-step instead of two-step difference. This is done by setting `'MINDyType, 'NoSmooth'` when running `GetHCPRestModel`.
 
 - Videos: `code/Supplementary/Video_trajectories.m`.
 

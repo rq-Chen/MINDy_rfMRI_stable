@@ -1,0 +1,215 @@
+---
+  title: "Dynamics of shuffled models"
+  author: "Ruiqi Chen"
+  date: "10/24/2024"
+  output:
+    html_document:
+      code_folding: hide
+---
+
+# Load data
+
+```{r, setup, results='hide', message=FALSE}
+library(tidyverse)
+library(here)
+
+# Figure directory
+fig_dir <- here("figures", "HCP_Rest_FIX_Simple_Mdl200_sess", "Shuffled_Models")
+dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
+
+# Popular attractor types (from the full population)
+att_types <- c("2FP 0LC", "0FP 1LC", "4FP 0LC", "1FP 0LC", "0FP 2LC")
+
+# Use the same levels for the proportion of shuffled weights
+use_prop <- c(0, 0.2, 0.4, 0.6, 0.8, 1)
+
+# Load the data
+data <- read_csv(here("data", "Shuffled_Models_Dynamics.csv")) %>%
+  mutate(Method = ifelse(Proportion == 0, "original", Method))
+
+# Combine number and type of attractors into a single column
+# and rename the types that are rare in the original data as "other"
+data <- data %>%
+  mutate(Type = paste0(nFP, "FP ", nLC, "LC")) %>%
+  mutate(Type = ifelse(Type %in% att_types, Type, "other")) %>%
+  mutate(Type = factor(Type, levels = c(att_types, "other")))
+
+# Filter the data with proportion
+data <- data %>%
+  filter(Proportion %in% use_prop) %>%
+  mutate(Proportion = factor(Proportion))
+```
+
+We tried three different methods to shuffle the weights of the models:
+
+1. "Within model": shuffle the weights across entries of the same model. This will destroy the structure of the weights.
+2. "Within person": for each entry of the weights, we randomly select from that entry of all the models of the same person. This will keep the structure of the weights, mimicking the effect of fitting the model on one person's data multiple times.
+3. "Across": similar to "within person", but we randomly select from all the models of the population. This will also keep the structure of the weights, but the weights are now shared across the population.
+
+We picked the first 50 participants, 100 fitted models in total. We then shuffled 20% to 100% of the weights of each model using the three methods above. After that, we identified the dynamics (number and type of attractors) of the shuffled models and compared them with the original models:
+
+```{r, data}
+head(data)
+```
+
+# Within-model shuffled models
+
+We computed the contingency table of the dynamics of the models versus the proportion of weights shuffled, and showed the histogram of the dynamics:
+
+```{r, within-model, fig.width=8, fig.height=6}
+
+# Test for independence between dynamics and proportion of shuffled weights
+
+tmp <- data %>%
+  filter(Method %in% c("original", "within_model")) %>%
+  group_by(Proportion, Type)
+
+# Contingency table
+tbl <- table(tmp$Proportion, tmp$Type)
+print(tbl)
+
+# Chi-square test and cramers V
+x2 <- chisq.test(tbl)
+print(x2)
+v <- sqrt(x2$statistic / sum(tbl) / (min(nrow(tbl), ncol(tbl)) - 1))
+names(v) <- "Cramer's V"
+print(v)
+
+# Histogram
+
+fig <- data %>%
+  filter(Method %in% c("original", "within_model")) %>%
+  group_by(Proportion) %>%
+  ggplot(aes(x = Type, fill = Proportion)) +
+  geom_bar(stat = "count", position = "dodge") +
+  scale_fill_viridis_d(direction = -1) +
+  labs(fill = "Proportion shuffled",
+       title = "Dynamics of models with weights shuffled across entries",
+       subtitle = paste("Cramer's V:", v)) +
+  theme_minimal() +
+  theme(text = element_text(size = 14))
+
+fig
+```
+
+We can see that shuffling the weights across entries had quite a strong effect on the dynamics of the models ($\chi^2$(`r x2$parameter`) = `r x2$statistic`, $p$ = `r x2$p.value`, Cramer's V = `r v`). Particularly, when shuffling more than 40% of the weights, the model no longer showed any nontrivial dynamics, which is very different from the original models. Therefore, the nontrivial dynamics require a certain structure in the weights that were captured in the fitted models.
+
+# Within-person shuffled models
+
+```{r, within-person, fig.width=8, fig.height=6}
+
+# Test for independence between dynamics and proportion of shuffled weights
+
+tmp <- data %>%
+  filter(Method %in% c("original", "within_person")) %>%
+  group_by(Proportion, Type)
+
+# Contingency table
+tbl <- table(tmp$Proportion, tmp$Type)
+print(tbl)
+
+# Chi-square test and cramers V
+x2 <- chisq.test(tbl)
+print(x2)
+v <- sqrt(x2$statistic / sum(tbl) / (min(nrow(tbl), ncol(tbl)) - 1))
+names(v) <- "Cramer's V"
+print(v)
+
+# Histogram
+
+fig <- data %>%
+  filter(Method %in% c("original", "within_person")) %>%
+  group_by(Proportion) %>%
+  ggplot(aes(x = Type, fill = Proportion)) +
+  geom_bar(stat = "count", position = "dodge") +
+  scale_fill_viridis_d(direction = -1) +
+  labs(fill = "Proportion shuffled",
+       title = "Dynamics of models with weights shuffled within person",
+       subtitle = paste("Cramer's V:", v)) +
+  theme_minimal() +
+  theme(text = element_text(size = 14))
+
+fig
+```
+
+We can see that shuffling the weights across different models of the same person has much smaller effect. In fact, the interaction between proportion of weights shuffled and the type of dynamics is not significant ($\chi^2$(`r x2$parameter`) = `r x2$statistic`, $p$ = `r x2$p.value`, Cramer's V = `r v`). Note that even when we select 100% the entries of the weights randomly from any model of the same person, the distribution of dynamics remains almost identical.
+
+# Across-person shuffled models
+
+```{r, across-person, fig.width=8, fig.height=6}
+
+# Test for independence between dynamics and proportion of shuffled weights
+
+tmp <- data %>%
+  filter(Method %in% c("original", "across")) %>%
+  group_by(Proportion, Type)
+
+# Contingency table
+tbl <- table(tmp$Proportion, tmp$Type)
+print(tbl)
+
+# Chi-square test and cramers V
+x2 <- chisq.test(tbl)
+print(x2)
+v <- sqrt(x2$statistic / sum(tbl) / (min(nrow(tbl), ncol(tbl)) - 1))
+names(v) <- "Cramer's V"
+print(v)
+
+# Histogram
+
+fig <- data %>%
+  filter(Method %in% c("original", "across")) %>%
+  group_by(Proportion) %>%
+  ggplot(aes(x = Type, fill = Proportion)) +
+  geom_bar(stat = "count", position = "dodge") +
+  scale_fill_viridis_d(direction = -1) +
+  labs(fill = "Proportion shuffled",
+       title = "Dynamics of models with weights shuffled across the population",
+       subtitle = paste("Cramer's V:", v)) +
+  theme_minimal() +
+  theme(text = element_text(size = 14))
+
+fig
+```
+
+Shuffling the weights across the population indeed changed the type of dynamics, but the effect size is much smaller than shuffling across entries ($\chi^2$(`r x2$parameter`) = `r x2$statistic`, $p$ = `r x2$p.value`, Cramer's V = `r v`). Most interestingly, when we select all the weight entries randomly across the population, we still observed a comparable proportion of nontrivial dynamics as the original models, but the 2FP type became more dominant compared to 1LC as the proportion of shuffled weights increased.
+
+# Combine the plots for publication
+
+```{r, fig, fig.width=9, fig.height=16}
+
+# Copy the "original" data for each method
+tmp <- data %>%
+  mutate(Method = ifelse(Method == "original", "within_model", Method)) %>%
+  bind_rows(data %>%
+              filter(Method == "original") %>%
+              mutate(Method = "within_person")) %>%
+  bind_rows(data %>%
+              filter(Method == "original") %>%
+              mutate(Method = "across"))
+
+# Rename the methods
+tmp <- tmp %>%
+  mutate(Method = factor(Method,
+    levels = c("within_model", "within_person", "across"),
+    labels = c("Across cells within model",
+      "Within cell across sessions", "Within cell across population"))) %>%
+  group_by(Proportion, Method)
+
+# Plot
+fig <- tmp %>%
+  ggplot(aes(x = Type, fill = Proportion)) +
+  geom_bar(stat = "count", position = "dodge") +
+  # scale_fill_viridis_d(direction = -1) +
+  scale_fill_manual(values = c("0" = "red",
+                    "0.2" = "gray80", "0.4" = "gray60", "0.6" = "gray40",
+                    "0.8" = "gray20", "1" = "black")) +
+  labs(fill = "Proportion of\nweights shuffled", y = "Number of models") +
+  theme_minimal() +
+  theme(text = element_text(size = 15), strip.text = element_text(size = 16)) +
+  facet_wrap(~Method, nrow = 3, strip.position = "top")
+
+ggsave(here(fig_dir, "Dynamics_Shuffled_Weights.pdf"), fig, width = 9, height = 16)
+
+fig
+```
