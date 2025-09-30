@@ -17,6 +17,11 @@ function [Out] = GetYeoNetworks(nP, nNet, varargin)
 %       - SortInd: (1, nP) double, indices to sort parcels according to Names
 %       - SortNet: (1, nP) double, network indices after sorting with SortInd
 %
+%   This function simply reads the Schaefer parcellation `info.txt` file
+%   under `data/atlas/` folder and extracts the relevant information. Therefore,
+%   make sure you have the correct version of the `info.txt` file there and be
+%   consistent with the version you used to parcellate your data. Version
+%   inconsistency will lead to wrong parcel ordering and naming.
 
 % Input
 if nargin < 2

@@ -3,10 +3,10 @@ function[]=MyNetMatYeo(MAT,nNet,ShowXText,ShowYText,netLines)
 %
 %  Inputs:
 %  - MAT: nX by nX matrix to plot
-%  - nNet: Number of Yeo networks to plot (7 or 17, default 17)
+%  - nNet: Which version of Schaefer parcellation to use (7 or 17, default 17)
 %  - ShowXText: 'bottom', 'top' or 'none' (default 'bottom')
 %  - ShowYText: 'left', 'right' or 'none' (default 'left')
-%  - netLines: Thick lines separating networs, true or false (default true)
+%  - netLines: Thick lines separating networks, true or false (default true)
 
 nX=size(MAT,1);
 if nargin<2 || isempty(nNet)

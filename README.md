@@ -2,7 +2,7 @@
 
 This repo contains the analysis scripts for:
 
-Chen, R., Singh, M., Braver, T.S., & Ching, S. (2025). Dynamical models reveal anatomically reliable attractor landscapes embedded in resting state brain networks. Imaging Neuroscience, Advance Publication. [https://doi.org/10.1162/imag_a_00442](https://doi.org/10.1162/imag_a_00442)
+Ruiqi Chen, Matthew Singh, Todd S. Braver, ShiNung Ching; Dynamical models reveal anatomically reliable attractor landscapes embedded in resting-state brain networks. Imaging Neuroscience 2025; 3 imag_a_00442. doi: [https://doi.org/10.1162/imag_a_00442](https://doi.org/10.1162/imag_a_00442)
 
 For simplicity, we include some functions from other packages in this repo. Please note that they might be covered by different licenses. In particular, we include `MINDy_Base_v1.0` from [singhmf/MINDy](https://github.com/singhmf/MINDy) (and modified it a little bit), `ft_cifti` (`cifti-matlab-master`) from [Washington-University/cifti-matlab](https://github.com/Washington-University/cifti-matlab), and part of `dFCwalk` from [FunDyn/dFCwalk](https://github.com/FunDyn/dFCwalk).
 
@@ -10,7 +10,9 @@ The scripts were tested using MATLAB R2022b under Windows and Linux. One Supplem
 
 ## Pipeline
 
-1. Follow [Singh2020PreProc](https://github.com/rq-Chen/Singh2020PreProc) to preprocess the HCP rfMRI data. By default there will be one file for each subject under the output folder. Files are named like "sub100206Y02.mat" (200 Schaefer atlas parcels + 19 freesurfer subcortical ROIs, for participant 100206).
+1. Follow [Singh2020PreProc](https://github.com/rq-Chen/Singh2020PreProc) to preprocess the HCP rfMRI data. By default there will be one file for each subject under the output folder. Files are named like "sub100206Y02.mat" (200 cortical parcels in Schaefer 17Network order + 19 freesurfer subcortical ROIs, for participant 100206).
+
+    - You can also use your own data organized in a similar way. Other than two visualization-related functions `GetYeoNetworks.m` and `PlotYeoSurface.m` (both used in `Report_Motifs.m`) the rest of the scripts are agnostic to the parcellation scheme.
 
 2. Run `init_prj.m` to set up paths (see below).
 
@@ -74,7 +76,7 @@ The scripts were tested using MATLAB R2022b under Windows and Linux. One Supplem
 
 - S18-19: `code/Report_Motifs.m`.
 
-- S20-22: Similar to S10, S13 and Figure 4, but using models fit with one-step instead of two-step difference. This is done by setting `'MINDyType, 'NoSmooth'` when running `GetHCPRestModel`.
+- S20-22: Similar to S10, S13 and Figure 4, but using models fit with one-step instead of two-step difference. This is done by setting `'MINDyType', 'NoSmooth'` when running `GetHCPRestModel`.
 
 - Videos: `code/Supplementary/Video_trajectories.m`.
 

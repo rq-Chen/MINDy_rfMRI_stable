@@ -1,0 +1,6 @@
+- `mmpL.func.gii` and `mmpR.func.gii`: Empty fMRI data files used in surface plots in `PlotYeoSurface.m`.
+- `S900.L.surf.gii` and `S900.R.surf.gii`: Default surface geometry files in `fs_LR_32k` space, used in `PlotYeoSurface.m`.
+- `Schaefer2018_#Parcels_17Networks_order.dlabel.nii`: Schaefer parcellation vertex label files as used in `Singh2020Preproc` repo. The version included here is at commit `4c32a6b` of the [official repo](https://github.com/ThomasYeoLab/CBIG/tree/master/stable_projects/brain_parcellation/Schaefer2018_LocalGlobal).
+- `Schaefer2018_#Parcels_17Networks_order_info.txt`: Schaefer parcellation parcel annotation files. The version included here is at commit `d1454a6` (up-to-date as of 09/30/2025) of the [official repo](https://github.com/ThomasYeoLab/CBIG/tree/master/stable_projects/brain_parcellation/Schaefer2018_LocalGlobal). This version has changed the names for some parcel, but the ordering remains the same as in the `dlabel.nii` files for 100/200/400 parcel atlases.
+- `SubMask.mat`: Template mask file for the 19 subcortical ROIs used in `PlotYeoSurface.m`.
+- `Wmask_RC.mat`: Optional connectivity mask to use in model fitting.
