@@ -2,7 +2,7 @@
 
 This repo contains the analysis scripts for:
 
-Ruiqi Chen, Matthew Singh, Todd S. Braver, ShiNung Ching; Dynamical models reveal anatomically reliable attractor landscapes embedded in resting-state brain networks. Imaging Neuroscience 2025; 3 imag_a_00442. doi: [https://doi.org/10.1162/imag_a_00442](https://doi.org/10.1162/imag_a_00442)
+Ruiqi Chen, Matthew Singh, Todd S. Braver, ShiNung Ching; Dynamical models reveal anatomically reliable attractor landscapes embedded in resting-state brain networks. *Imaging Neuroscience* 2025; 3 imag_a_00442. doi: [https://doi.org/10.1162/imag_a_00442](https://doi.org/10.1162/imag_a_00442)
 
 For simplicity, we include some functions from other packages in this repo. Please note that they might be covered by different licenses. In particular, we include `MINDy_Base_v1.0` from [singhmf/MINDy](https://github.com/singhmf/MINDy) (and modified it a little bit), `ft_cifti` (`cifti-matlab-master`) from [Washington-University/cifti-matlab](https://github.com/Washington-University/cifti-matlab), and part of `dFCwalk` from [FunDyn/dFCwalk](https://github.com/FunDyn/dFCwalk).
 
